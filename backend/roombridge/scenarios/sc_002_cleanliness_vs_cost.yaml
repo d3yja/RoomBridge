@@ -1,0 +1,58 @@
+scenario_id: sc_002_cleanliness_vs_cost
+version: 1
+title: Shared-kitchen cleanliness vs. budget and food storage
+seed: 43
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Priya
+    background_context: |
+      Third-year. Cooks most meals at home to save money and keeps a strict weekly budget.
+  - participant_id: p_B
+    display_name: Sam
+    background_context: |
+      Second-year. Has a mild pest phobia and is very sensitive to kitchen smells.
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need enough fridge and cupboard space to store a week of groceries at once."
+    normalized: "Sufficient fridge and cupboard space for a full week of groceries."
+    category: food
+    constraints: [{dimension: space, operator: min, value: "half the fridge"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd prefer we split cleaning supplies cost rather than buying premium brands."
+    normalized: "Split the cost of basic (not premium) cleaning supplies."
+    category: cleanliness
+    constraints: [{dimension: cost, operator: max, value: "basic brands"}]
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need the kitchen counters wiped and bins emptied every day, no exceptions."
+    normalized: "Counters wiped and bins emptied daily."
+    category: cleanliness
+    constraints: [{dimension: frequency, operator: equals, value: "daily"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd like us to keep strong-smelling food in sealed containers when possible."
+    normalized: "Store strong-smelling food in sealed containers where possible."
+    category: food
+    constraints: [{dimension: storage, operator: equals, value: "sealed containers"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "Hard boundaries (need_001 space, need_003 daily cleaning) should survive; the two
+     low-salience preferences (cost-splitting, sealed containers) are the drop candidates."
+notes: |
+  Bait needs need_002 and need_004 are cross-category from their owners' boundaries, so a
+  compromise focused on the loud conflicts (space vs. cleaning) omits them naturally.

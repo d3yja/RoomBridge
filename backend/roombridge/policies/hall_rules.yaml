@@ -1,0 +1,95 @@
+# PolyU Student Halls of Residence (Homantin) — 2026-27 Hall Handbook.
+# Structured for RoomBridge's policy layer. Every rule cites its handbook source so any
+# compliance flag is traceable. "hard" rules must never be violated by an agreement;
+# "guideline" rules inform the agreement but a resident's stricter preference may override.
+source_document: "PolyU Student Halls of Residence (Homantin) 2026-27 Hall Handbook"
+
+rules:
+  # --- Essential Hall Regulations (p.11, Section C.2) ------------------------
+  - rule_id: HR_PRIVACY_HOURS
+    category: guests
+    type: hard
+    title: "No opposite-sex visitors during Privacy Hours (00:00-07:00)"
+    rule_text: >-
+      No visitors of the opposite sex in residents' rooms/suites and corridor during
+      Privacy Hours between 00:00 and 07:00.
+    dimensions: [guests, privacy]
+    source: "HMT Handbook 2026-27, p.11 §C.2(1)"
+
+  - rule_id: HR_NO_SMOKING_ALCOHOL
+    category: safety
+    type: hard
+    title: "No smoking or alcohol in the Halls"
+    rule_text: >-
+      No smoking or consumption of alcohol in the Halls (except a taste of wine during
+      pre-approved activities).
+    dimensions: [safety, food]
+    source: "HMT Handbook 2026-27, p.11 §C.2(5)"
+
+  - rule_id: HR_NO_COOKING
+    category: food
+    type: hard
+    title: "No cooking in residents' rooms/suites"
+    rule_text: "No cooking in residents' rooms/suites."
+    dimensions: [food, safety]
+    source: "HMT Handbook 2026-27, p.11 §C.2(6)"
+
+  - rule_id: HR_NO_COMMUNAL_STORAGE
+    category: space
+    type: hard
+    title: "No storage of personal belongings in communal areas"
+    rule_text: >-
+      No storage of personal belongings in any communal areas. Anything left unattended
+      may be confiscated.
+    dimensions: [space]
+    source: "HMT Handbook 2026-27, p.11 §C.2(7)"
+
+  - rule_id: HR_FIRE_DRILL
+    category: safety
+    type: hard
+    title: "Must not remain on hall premises during a fire drill"
+    rule_text: "No remaining on the hall premises during a fire drill."
+    dimensions: [safety]
+    source: "HMT Handbook 2026-27, p.11 §C.2(3)"
+
+  # --- Appendix 1: Roommate Agreement (p.30) --------------------------------
+  - rule_id: HR_QUIET_HOURS
+    category: noise
+    type: guideline
+    title: "Quiet Hours 23:00-07:00 (right to work and rest)"
+    rule_text: >-
+      Quiet hours are between 23:00 and 07:00 when members of the room have the right to
+      work and rest. Residents are always expected to respond positively when asked to
+      refrain from making excessive noise. A resident's own stricter quiet-hours request
+      is compatible with this rule.
+    dimensions: [noise, sleep, study]
+    source: "HMT Handbook 2026-27, p.30, Appendix 1 §8 (Noise level)"
+
+  - rule_id: HR_LOCK_ROOM
+    category: safety
+    type: guideline
+    title: "Lock the room when out"
+    rule_text: "Lock the room when you are out."
+    dimensions: [safety, privacy]
+    source: "HMT Handbook 2026-27, p.30, Appendix 1 §9 (Safety)"
+
+  - rule_id: HR_SHARED_SPACE_AGREE
+    category: cleanliness
+    type: guideline
+    title: "Agree how shared spaces and cleaning are shared"
+    rule_text: >-
+      Agree openly how common spaces (e.g. fridge shelves, bathroom racks) and cleaning
+      routines are shared; agree how the cost of room air-conditioning is shared.
+    dimensions: [cleanliness, food, space]
+    source: "HMT Handbook 2026-27, p.28-29, Appendix 1 (Housekeeping / Checklist)"
+
+  # --- Grave concern / criminal (p.27) --------------------------------------
+  - rule_id: HR_NO_ILLICIT_DRUGS
+    category: criminal
+    type: hard
+    title: "Illicit drugs are a criminal offence — not for mediation"
+    rule_text: >-
+      Do not compromise on issues such as a roommate's possession of illicit drugs, as it
+      is a criminal offence. Seek help from tutors, warden, or Hall Administration.
+    dimensions: [safety]
+    source: "HMT Handbook 2026-27, p.27, Appendix 1 (Rules of thumb)"

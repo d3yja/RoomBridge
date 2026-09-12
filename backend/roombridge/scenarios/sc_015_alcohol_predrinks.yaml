@@ -1,0 +1,55 @@
+scenario_id: sc_015_alcohol_predrinks
+version: 1
+title: Pre-drinks in the room vs. quiet weekend mornings (policy conflict)
+seed: 56
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Jake
+    background_context: "Sociable and likes to gather friends before nights out."
+  - participant_id: p_B
+    display_name: Priyanka
+    background_context: "Has weekend shifts and needs rest and a clean room."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need to be able to host a few friends for pre-drinks in our room before we go out."
+    normalized: "Host friends for pre-drinks in the room before going out."
+    category: guests
+    constraints: [{dimension: day, operator: equals, value: "weekend evening"}]
+    stated_importance: 4
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like to keep my string lights up on my side."
+    normalized: "Keep string lights on his side of the room."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need the room quiet and clean on weekend mornings because I work early."
+    normalized: "Quiet and clean room on weekend mornings."
+    category: sleep
+    constraints: [{dimension: time, operator: within, value: "weekend morning"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on a limit for how many guests at once."
+    normalized: "Agree a limit on the number of guests at once."
+    category: guests
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_001 involves alcohol in the room, breaking a HARD rule (no alcohol in the Halls,
+     HMT Handbook p.11 C.2(5)). Baselines may echo in-room drinks -> VIOLATION; rules-fed
+     conditions move the gathering to a permitted common social space -> compliant/partial."
+notes: "Policy-conflict scenario (alcohol). Also collides with the quiet-morning boundary."

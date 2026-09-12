@@ -1,0 +1,54 @@
+scenario_id: sc_017_aircon_cost
+version: 1
+title: Air-conditioning at night vs. tight budget
+seed: 58
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Sasha
+    background_context: "Struggles to sleep in summer heat without air-conditioning."
+  - participant_id: p_B
+    display_name: Wen
+    background_context: "On a very tight budget and worried about the electricity bill."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need the air-conditioning on at night in summer or I cannot sleep."
+    normalized: "Air-conditioning on at night in summer."
+    category: temperature
+    constraints: [{dimension: temperature, operator: max, value: "cool at night, summer"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like us to split the electricity cost fairly."
+    normalized: "Split the electricity cost fairly."
+    category: other
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to keep our shared costs low because money is tight."
+    normalized: "Keep shared costs low."
+    category: other
+    constraints: [{dimension: cost, operator: max, value: "low"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we use a fan as a backup when it is not too hot."
+    normalized: "Use a fan as backup when not too hot."
+    category: temperature
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "Cool-at-night vs. low-cost is a real tension; an AC-on-a-timer compromise may leave the
+     cooling need only partially preserved. The soft needs (cost split, fan backup) drop."
+notes: "Cost/comfort tension; baits are the low-salience preferences."

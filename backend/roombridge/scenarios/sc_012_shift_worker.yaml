@@ -1,0 +1,54 @@
+scenario_id: sc_012_shift_worker
+version: 1
+title: Daytime sleep vs. daytime study light
+seed: 53
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Kofi
+    background_context: "Works night shifts and needs to sleep during the day."
+  - participant_id: p_B
+    display_name: Mei
+    background_context: "Studies at her desk during the day and likes natural light."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I work night shifts and need to sleep undisturbed during the day."
+    normalized: "Sleep undisturbed during daytime hours."
+    category: sleep
+    constraints: [{dimension: time, operator: within, value: "daytime, variable"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like the blinds kept closed while I sleep in the day."
+    normalized: "Blinds closed during his daytime sleep."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need some natural light at my desk during the day to study."
+    normalized: "Natural light at the desk during the day."
+    category: study
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on who cleans the window."
+    normalized: "Agree on cleaning the window."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: partially_preserved
+  need_004: not_addressed
+expected_observations:
+  - "Daytime sleep vs. daytime light is a genuine tension; a desk lamp / partial-blinds
+     compromise can leave the light need only partially preserved. The soft needs drop."
+notes: "Tension between the two boundaries; baits are blinds preference and window cleaning."

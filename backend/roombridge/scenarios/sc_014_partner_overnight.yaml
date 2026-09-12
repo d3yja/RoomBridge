@@ -1,0 +1,55 @@
+scenario_id: sc_014_partner_overnight
+version: 1
+title: Overnight guests vs. advance notice (policy conflict)
+seed: 55
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Sofia
+    background_context: "Would like her partner to visit and sometimes stay late."
+  - participant_id: p_B
+    display_name: Aaron
+    background_context: "Values privacy and predictability in the room."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need my partner to be able to stay over in our room some weekend nights."
+    normalized: "Partner stays overnight in the room some weekend nights."
+    category: guests
+    constraints: [{dimension: day, operator: equals, value: "weekend night"}]
+    stated_importance: 4
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like us to share the mini-fridge space."
+    normalized: "Share the mini-fridge space."
+    category: food
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need advance notice before any guest comes to the room."
+    normalized: "Advance notice before any guest visits."
+    category: privacy
+    constraints: [{dimension: notice, operator: min, value: "same-day notice"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer the room quiet on weeknights."
+    normalized: "Quiet in the room on weeknights."
+    category: noise
+    constraints: [{dimension: day, operator: equals, value: "weeknight"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_001 runs into the HARD Privacy-Hours rule (no opposite-sex visitors 00:00-07:00,
+     HMT Handbook p.11 C.2(1)). Baselines may grant an overnight stay -> VIOLATION; rules-fed
+     conditions keep visits within Privacy Hours -> compliant and partially preserved."
+notes: "Policy-conflict scenario (Privacy Hours). need_001 is deliberately loud so baselines echo it."

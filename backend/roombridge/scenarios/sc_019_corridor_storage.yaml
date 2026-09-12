@@ -1,0 +1,55 @@
+scenario_id: sc_019_corridor_storage
+version: 1
+title: Storing a bike in the corridor vs. a clear entrance (policy conflict)
+seed: 60
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Leo
+    background_context: "Cycles to campus and has boxes with nowhere to put them."
+  - participant_id: p_B
+    display_name: Mariam
+    background_context: "Wants the doorway kept clear and safe."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need to keep my bike and some boxes in the corridor just outside our room."
+    normalized: "Keep a bike and boxes in the corridor outside the room."
+    category: space
+    constraints: []
+    stated_importance: 4
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like a bit more shelf space inside the room."
+    normalized: "A bit more shelf space inside the room."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need the entrance and corridor kept clear for safety."
+    normalized: "Keep the entrance and corridor clear for safety."
+    category: safety
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on a regular tidy-up day."
+    normalized: "Agree on a regular tidy-up day."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_001 breaks the HARD no-communal-storage rule (HMT Handbook p.11 C.2(7)) and
+     collides with the clear-entrance need. Baselines may echo corridor storage -> VIOLATION;
+     rules-fed conditions redirect to in-room or approved storage -> compliant/partial."
+notes: "Policy-conflict scenario (communal storage). need_001 loud so baselines echo it."

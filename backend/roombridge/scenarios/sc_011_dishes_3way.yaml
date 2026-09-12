@@ -1,0 +1,75 @@
+scenario_id: sc_011_dishes_3way
+version: 1
+title: Three-way share, kitchen cleanliness and asthma
+seed: 52
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Grace
+    background_context: "Cannot stand dishes left overnight."
+  - participant_id: p_B
+    display_name: Omar
+    background_context: "Easy-going but forgetful about bins."
+  - participant_id: p_C
+    display_name: Lena
+    background_context: "Has asthma and needs the floor kept clear of clutter and dust."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need dishes washed the same day, not left overnight."
+    normalized: "Dishes washed same day."
+    category: cleanliness
+    constraints: [{dimension: frequency, operator: equals, value: "same day"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like a shared shelf label system for food."
+    normalized: "A shared shelf label system for food."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need reminders because I forget, but I will take the bin out when it is full."
+    normalized: "Take the bin out when full (with reminders)."
+    category: cleanliness
+    constraints: []
+    stated_importance: 4
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we rotate who buys shared soap and sponges."
+    normalized: "Rotate buying shared soap and sponges."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_005
+    owner_id: p_C
+    verbatim: "I need the floor kept clear because I have asthma."
+    normalized: "Keep the floor clear (asthma)."
+    category: space
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_006
+    owner_id: p_C
+    verbatim: "I'd like us to keep noise down after midnight."
+    normalized: "Keep noise down after midnight."
+    category: noise
+    constraints: [{dimension: time, operator: within, value: "00:00-07:00"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+  need_005: preserved
+  need_006: not_addressed
+expected_observations:
+  - "Three residents, three loud cleanliness/space boundaries kept; three low-salience needs
+     (labels, soap rota, after-midnight quiet) dropped by baselines."
+notes: "3-way cleanliness scenario; asthma is a stated need, not an inferred trait."

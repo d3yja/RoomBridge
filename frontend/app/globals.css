@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+body { background: #f7f6f2; color: #12151c; }
+
+/* The two render registers: stated vs AI-inferred (plan section 12). Never mixed. */
+.reg-stated {
+  border: 1px solid #d4d0c4; border-left: 3px solid #1f6feb;
+  background: #ffffff; border-radius: 6px;
+}
+.reg-inferred {
+  border: 1px dashed #b9a6e0; border-left: 3px dashed #8250df;
+  background: #f6f2fc; border-radius: 6px;
+}
+.chip { font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  padding: 1px 6px; border-radius: 999px; font-weight: 600; }
+.dot { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
