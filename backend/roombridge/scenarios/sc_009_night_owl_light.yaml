@@ -1,0 +1,54 @@
+scenario_id: sc_009_night_owl_light
+version: 1
+title: Light sleeper vs. late studier
+seed: 50
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Chloe
+    background_context: "Light sleeper who struggles if the room is bright at night."
+  - participant_id: p_B
+    display_name: Diego
+    background_context: "Studies best late at night."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need the room dark by 11pm because I am a very light sleeper."
+    normalized: "Room dark from 23:00."
+    category: sleep
+    constraints: [{dimension: light, operator: max, value: "dark from 23:00"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like to keep a small plant on the windowsill."
+    normalized: "Keep a small plant on the windowsill."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to study at my desk until about 1am with a small book light."
+    normalized: "Study at the desk until ~01:00 with a small book light."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "23:00-01:00"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on a morning alarm time."
+    normalized: "Agree on a morning alarm time."
+    category: other
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "Dark-room and late-study collide but can both be met (book light, eye mask). The two
+     soft needs (plant, alarm time) are the drop candidates."
+notes: "Classic light/sleep tension; baits are the low-salience preferences."

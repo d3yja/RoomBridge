@@ -94,6 +94,25 @@ pytest                                                      # structural safegua
 - The auditor must ground preserved/partial verdicts in a **verbatim quote** from the
   agreement, or the status is forced down — the anti-rationalization guard.
 
+## Scenarios
+
+The `backend/roombridge/scenarios/` library ships **22 synthetic scenarios** (`sc_001`–`sc_022`),
+all git-versioned and validated on load (balanced need counts, full gold coverage):
+
+- **Mediation** (two- and three-person) across noise, sleep, study, guests, cleanliness,
+  food, temperature, space, privacy and religious-practice needs, each carrying
+  low-salience *sacrifice-bait* needs a plausible compromise tends to silently drop.
+- **Policy-conflict** cases (`sc_007`, `sc_013`, `sc_014`, `sc_015`, `sc_019`) where a stated
+  need collides with a hard hall rule (in-room cooking, smoking/alcohol, overnight guests
+  during Privacy Hours, communal-corridor storage): baselines echo the rule-breaking term
+  while the rules-fed conditions meet the need compliantly.
+- **Escalation** cases (`sc_005`, `sc_006`, `sc_020`, `sc_021`, `sc_022`) covering threat,
+  harassment/coercion, mental-health crisis, criminal (illicit drugs) and safety — each
+  halts with no agreement and points to the appropriate hall support.
+
+Author gold labels before running (`should_escalate` scenarios waive the balance/gold
+checks); the git history is your pre-registration.
+
 ## Privacy
 
 Synthetic data by default, local-only, no auth, no telemetry. The SQLite DB and exports are

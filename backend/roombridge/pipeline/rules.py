@@ -37,18 +37,29 @@ _POLICY_TRIGGERS: list[tuple[str, "re.Pattern[str]"]] = [
     ("HR_NO_COOKING", re.compile(
         r"\bcook\w*|\bhot ?plate|\bstove|\binduction cooker|\brice cooker|\bdeep[- ]fry\w*", re.I)),
     ("HR_NO_SMOKING_ALCOHOL", re.compile(
-        r"\bsmok\w*|\bcigarette\w*|\bvap\w*|\balcohol\w*|\bbeer\b|\bwine\b|\bspirits\b", re.I)),
+        r"\bsmok\w*|\bcigarette\w*|\bvap\w*|\balcohol\w*|\bbeer\b|\bwine\b|\bspirits\b|"
+        r"\bpre[- ]?drink\w*", re.I)),
+    # Guests/privacy needs a PERSON context -- bare "overnight" (e.g. dishes left overnight)
+    # must not fire.
     ("HR_PRIVACY_HOURS", re.compile(
-        r"\bovernight\b|\bstay\w* over\b|\bsleep\w* over\b|\bpartner stays?\b|"
+        r"\bovernight (?:guest|visitor|stay)\w*|\bstay\w* over(?:night)?\b|\bsleep\w* over\b|"
+        r"\bpartner\b[^.?!]{0,20}\b(?:stay|over)|\bguest\w*[^.?!]{0,20}overnight|"
         r"\bopposite[- ]sex (?:guest|visitor)\w*", re.I)),
+    # Storing belongings in a communal/corridor space (needs a storage object/verb, so
+    # "keep the corridor clear" does not match).
+    ("HR_NO_COMMUNAL_STORAGE", re.compile(
+        r"\b(?:bike|boxes|belongings|luggage|gear|items|store|storing|storage)\b"
+        r"[^.?!]{0,40}\b(?:corridor|hallway|communal area|common area|communal space)\b|"
+        r"\b(?:corridor|hallway|communal area|common area)\b[^.?!]{0,40}"
+        r"\b(?:bike|boxes|belongings|luggage|gear|store|storing|storage)\b", re.I)),
 ]
 
 # If any of these appear near a trigger, the term is complying WITH the rule, not breaking it.
 _COMPLIANCE_CUES = re.compile(
     r"\bno\b|\bnot\b|\bn't\b|\bavoid\b|\bwithout\b|\bout of\b|\brather than\b|\binstead of\b|"
-    r"\bprohibit\w*|\bforbidden\b|\bnot allowed\b|\bfree of\b|\bshared\b|\bcommon\b|"
-    r"\bcommunal\b|\bpantry\b|\bcanteen\b|\bper hall rule|\bin line with hall rule|"
-    r"\bhall rule", re.I)
+    r"\bprohibit\w*|\bforbidden\b|\bnot allowed\b|\bfree of\b|\bkept? clear\b|\bshared\b|"
+    r"\bcommon room\b|\bpantry\b|\bcanteen\b|\bdesignated\b|\bapproved (?:storage|area)\b|"
+    r"\bper hall rule|\bin line with hall rule|\bhall rule", re.I)
 
 # demographic term ... connective ... preference verb
 _STEREOTYPE = re.compile(

@@ -1,0 +1,54 @@
+scenario_id: sc_010_gaming_study
+version: 1
+title: Online study calls vs. voice-chat gaming
+seed: 51
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Aisha
+    background_context: "Has evening online tutorials that need quiet."
+  - participant_id: p_B
+    display_name: Ben
+    background_context: "Plays online games with friends using voice chat."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need quiet for my online study calls on weekday evenings."
+    normalized: "Quiet during online study calls on weekday evenings."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "weekday 19:00-21:00"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like to put a few posters on my side of the room."
+    normalized: "Put a few posters on her side of the room."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to be able to game with voice chat sometimes in the evenings."
+    normalized: "Game with voice chat in the evenings."
+    category: noise
+    constraints: [{dimension: time, operator: within, value: "evening"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we split the cost of a wifi extender."
+    normalized: "Split the cost of a wifi extender."
+    category: other
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: partially_preserved
+  need_004: not_addressed
+expected_observations:
+  - "Voice-chat gaming can be preserved with a headset during study-call windows, so it may
+     come out partially preserved once it collides with the study need. The soft needs drop."
+notes: "Direct schedule conflict on the two boundaries; baits are posters and wifi cost."

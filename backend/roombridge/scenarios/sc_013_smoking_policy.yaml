@@ -1,0 +1,56 @@
+scenario_id: sc_013_smoking_policy
+version: 1
+title: Smoking by the window vs. clean air (policy conflict)
+seed: 54
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Ravi
+    background_context: "Smokes to unwind and would prefer not to go downstairs each time."
+  - participant_id: p_B
+    display_name: Hana
+    background_context: "Has asthma and is very sensitive to smoke."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need to be able to smoke by the open window in our room in the evenings."
+    normalized: "Smoke by the open window in the room in the evenings."
+    category: safety
+    constraints: [{dimension: time, operator: within, value: "evening"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like to keep my snacks on the shared shelf."
+    normalized: "Keep snacks on the shared shelf."
+    category: food
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need the room kept completely free of smoke because of my asthma."
+    normalized: "Keep the room free of smoke (asthma)."
+    category: cleanliness
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on a weekly cleaning day."
+    normalized: "Agree on a weekly cleaning day."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_001 breaks a HARD hall rule (no smoking in the Halls, HMT Handbook p.11 C.2(5))
+     and also collides with need_003. Baselines may echo in-room smoking -> a VIOLATION;
+     rules-fed conditions redirect it to a designated outdoor area -> compliant, so the need
+     is partially preserved, never silently dropped."
+notes: "Policy-conflict scenario (smoking). Also a direct need-vs-need clash with clean air."

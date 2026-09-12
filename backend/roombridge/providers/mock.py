@@ -88,9 +88,15 @@ _COMPLY_MAP = [
     (re.compile(r"\bcook\w*|stove|hot ?plate|rice cooker|induction", re.I),
      "use the shared pantry / common kitchen for cooking rather than the room "
      "(hall rule: no cooking in rooms/suites)"),
-    (re.compile(r"\bsmok\w*|cigarette|vap\w*|alcohol|beer|wine", re.I),
-     "keep smoking and alcohol out of the room, in line with hall rules"),
-    (re.compile(r"overnight|stay\w* over|partner stays?|opposite[- ]sex", re.I),
+    (re.compile(r"\bsmok\w*|cigarette|vap\w*|alcohol|beer|wine|pre[- ]?drink\w*", re.I),
+     "keep smoking and alcohol out of the room and use a permitted common social space, "
+     "in line with hall rules"),
+    (re.compile(r"\b(bike|boxes|belongings|luggage|gear)\b[^.?!]{0,40}(corridor|hallway|communal)"
+                r"|(corridor|hallway|communal)[^.?!]{0,40}\b(bike|boxes|store|storage)\b", re.I),
+     "store belongings inside the room or in an approved storage area, not in the corridor "
+     "(hall rule: no storage in communal areas)"),
+    (re.compile(r"overnight (guest|visitor|stay)|stay\w* over|partner\w*[^.?!]{0,20}(stay|over)|"
+                r"opposite[- ]sex", re.I),
      "keep visitors within hall Privacy Hours (no opposite-sex visitors 00:00-07:00)"),
 ]
 

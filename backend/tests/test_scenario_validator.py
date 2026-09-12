@@ -43,3 +43,15 @@ def test_escalation_scenario_waives_balance():
     data = _ScenarioYAML(**BASE, should_escalate=True,
                          needs=_needs({"p_A": 1, "p_B": 0}), gold_audit={})
     validate_scenario(data)  # no raise
+
+
+
+def test_all_shipped_scenarios_load():
+    """Every YAML in the scenarios dir validates and there are at least 22 of them."""
+    from roombridge.config import SCENARIO_DIR
+    from roombridge.scenarios.loader import load_yaml
+
+    files = sorted(SCENARIO_DIR.glob("*.yaml"))
+    assert len(files) >= 22, f"expected >=22 scenarios, found {len(files)}"
+    for f in files:
+        load_yaml(f)  # raises on any validation error

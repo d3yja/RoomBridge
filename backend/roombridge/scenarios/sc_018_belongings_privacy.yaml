@@ -1,0 +1,54 @@
+scenario_id: sc_018_belongings_privacy
+version: 1
+title: Asking before borrowing vs. storing sports gear
+seed: 59
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Nina
+    background_context: "Likes clear boundaries around her belongings."
+  - participant_id: p_B
+    display_name: Theo
+    background_context: "Plays sports and has bulky gear to store."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need my roommate to ask before borrowing any of my things."
+    normalized: "Ask before borrowing her belongings."
+    category: privacy
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like to keep my desk area private."
+    normalized: "Keep her desk area private."
+    category: privacy
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need somewhere in the room to store my sports gear."
+    normalized: "Store sports gear somewhere in the room."
+    category: space
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we share basic cleaning supplies."
+    normalized: "Share basic cleaning supplies."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "Both boundaries (ask-first, gear storage) are compatible in-room and should survive;
+     the soft needs (private desk, shared supplies) drop."
+notes: "Privacy vs. space; baits are the low-salience preferences."

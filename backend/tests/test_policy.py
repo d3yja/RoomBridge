@@ -67,6 +67,23 @@ def test_rule_ignores_compliant_reframe():
         "Keep smoking and alcohol out of the room, in line with hall rules.") == []
 
 
+def test_bare_overnight_does_not_trigger_privacy_rule():
+    # regression: "dishes left overnight" must not fire the guest Privacy-Hours rule.
+    assert policy_violation_rule("Do not leave dishes in the sink overnight.") == []
+    assert policy_violation_rule("Cannot stand dishes left overnight.") == []
+    hits = dict(policy_violation_rule("My partner will stay over on weekend nights."))
+    assert "HR_PRIVACY_HOURS" in hits
+
+
+def test_predrinks_and_communal_storage_fire():
+    assert "HR_NO_SMOKING_ALCOHOL" in dict(
+        policy_violation_rule("Host friends for pre-drinks in our room before we go out."))
+    assert "HR_NO_COMMUNAL_STORAGE" in dict(
+        policy_violation_rule("Keep my bike and boxes in the corridor outside our room."))
+    # keeping the corridor clear is compliant, not a violation
+    assert policy_violation_rule("Keep the entrance and corridor kept clear for safety.") == []
+
+
 # --- escalation enrichment ----------------------------------------------------
 def test_criminal_escalation_routes_to_police():
     v = escalation_rule("My roommate is selling drugs from our room.")

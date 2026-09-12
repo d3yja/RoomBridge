@@ -1,0 +1,75 @@
+scenario_id: sc_016_bathroom_3way
+version: 1
+title: Three-way suite, morning bathroom and exam quiet
+seed: 57
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Tara
+    background_context: "Has an early commute and needs the bathroom on time."
+  - participant_id: p_B
+    display_name: Noah
+    background_context: "Showers at night to wind down."
+  - participant_id: p_C
+    display_name: Ivy
+    background_context: "Has exams and needs quiet evenings."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need the bathroom free at 7:30am for my commute."
+    normalized: "Bathroom free at 07:30."
+    category: cleanliness
+    constraints: [{dimension: time, operator: equals, value: "07:30"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like a shared toiletry rack."
+    normalized: "A shared toiletry rack."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to shower at night because it helps me sleep."
+    normalized: "Shower at night."
+    category: sleep
+    constraints: [{dimension: time, operator: within, value: "night"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on cleaning the sink."
+    normalized: "Agree on cleaning the sink."
+    category: cleanliness
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_005
+    owner_id: p_C
+    verbatim: "I need quiet in the evenings to study for exams."
+    normalized: "Quiet evenings for exam study."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "evening"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_006
+    owner_id: p_C
+    verbatim: "I'd like us to share a kettle."
+    normalized: "Share a kettle."
+    category: food
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+  need_005: preserved
+  need_006: not_addressed
+expected_observations:
+  - "Three schedule boundaries (morning bathroom, night shower, exam quiet) are compatible
+     and should survive; the three low-salience needs (rack, sink rota, kettle) drop."
+notes: "3-way logistics scenario; baits are the shared-item preferences."
