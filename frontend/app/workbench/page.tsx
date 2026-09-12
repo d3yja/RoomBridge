@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { listScenarios, getScenario, Need, RunView, ScenarioView, NeedStatus } from "@/lib/api";
+import {
+  listScenarios, getScenario, latestRun, Need, RunView, ScenarioView, NeedStatus, Provider,
+} from "@/lib/api";
 import { NeedLedger } from "@/components/NeedLedger";
 import { Stated, Inferred, StatusPill } from "@/components/Registers";
 import { AgreementCard } from "@/components/AgreementCard";
@@ -20,15 +22,26 @@ export default function Workbench() {
   const [running, setRunning] = useState(false);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<Record<string, NeedStatus>>({});
+  const [provider, setProvider] = useState<Provider>("mock");
+  const [note, setNote] = useState<string>("");
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => { listScenarios().then(setScenarios); }, []);
   useEffect(() => { getScenario(sid).then(setScenario); }, [sid]);
 
+  // View an existing cached run for this scenario+condition+provider (no streaming, no spend).
+  async function loadCached() {
+    esRef.current?.close();
+    setEvents([]); setRun(null); setLiveStatus({}); setNote("");
+    const r = await latestRun(sid, cond, provider);
+    if (r) { setRun(r); setEvents([`loaded cached ${provider} run`]); }
+    else setNote(`No cached ${provider} run for ${sid} / ${cond}. Run it via the CLI, or use ▶ Run to stream a fresh one.`);
+  }
+
   function start() {
     esRef.current?.close();
-    setEvents([]); setRun(null); setLiveStatus({}); setRunning(true);
-    const es = new EventSource(`/api/runs/stream/${sid}/${cond}?provider=mock`);
+    setEvents([]); setRun(null); setLiveStatus({}); setRunning(true); setNote("");
+    const es = new EventSource(`/api/runs/stream/${sid}/${cond}?provider=${provider}`);
     esRef.current = es;
     es.onmessage = (m) => {
       const ev = JSON.parse(m.data);
@@ -62,10 +75,24 @@ export default function Workbench() {
             </button>
           ))}
         </div>
+        <div className="flex rounded-md overflow-hidden border border-[#d4d0c4]">
+          {(["mock", "openrouter"] as Provider[]).map((p) => (
+            <button key={p} onClick={() => setProvider(p)}
+              className={`px-3 py-1.5 text-sm ${provider === p ? "bg-ink text-white" : "bg-white text-neutral-600"}`}>
+              {p === "mock" ? "Mock" : "OpenRouter"}
+            </button>
+          ))}
+        </div>
+        <button onClick={loadCached} disabled={running}
+          className="rounded-md border border-[#d4d0c4] bg-white px-3 py-1.5 text-sm font-medium disabled:opacity-50">
+          View cached
+        </button>
         <button onClick={start} disabled={running}
-          className="rounded-md bg-stated text-white px-4 py-1.5 text-sm font-medium disabled:opacity-50">
+          className="rounded-md bg-stated text-white px-4 py-1.5 text-sm font-medium disabled:opacity-50"
+          title={provider === "openrouter" ? "streams a fresh run — calls the model (costs money)" : "streams a fresh mock run"}>
           {running ? "Running…" : "▶ Run"}
         </button>
+        {note && <span className="text-[12px] text-lost">{note}</span>}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_360px] gap-4">

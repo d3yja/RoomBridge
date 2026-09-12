@@ -29,6 +29,13 @@ export interface RunView {
   metrics: Record<string, number | Record<string, number>>;
   messages: { round: number; agent: string; content: string }[];
   cached?: boolean;
+  no_run?: boolean;
+}
+
+export type Provider = "mock" | "openrouter";
+
+export interface Availability {
+  has_mock: boolean; has_openrouter: boolean; models: string[]; n_runs: number;
 }
 
 export async function listScenarios() {
@@ -37,19 +44,22 @@ export async function listScenarios() {
 export async function getScenario(id: string): Promise<ScenarioView> {
   return (await fetch(`${API}/scenarios/${id}`)).json();
 }
-export async function runDemo(scenario_id: string): Promise<{
-  scenario: ScenarioView; conditions: Record<string, RunView>;
-}> {
+export async function getAvailability(id: string): Promise<Availability> {
+  return (await fetch(`${API}/runs/available/${id}`)).json();
+}
+export async function runDemo(
+  scenario_id: string, provider: Provider = "mock", live = false,
+): Promise<{ scenario: ScenarioView; conditions: Record<string, RunView> }> {
   return (await fetch(`${API}/demo`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scenario_id, provider: "mock" }),
+    body: JSON.stringify({ scenario_id, provider, live }),
   })).json();
 }
-export async function runOne(scenario_id: string, condition: string): Promise<RunView> {
-  return (await fetch(`${API}/runs`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scenario_id, condition, provider: "mock" }),
-  })).json();
+export async function latestRun(
+  scenario_id: string, condition: string, provider: Provider,
+): Promise<RunView | null> {
+  const r = await fetch(`${API}/runs/latest/${scenario_id}/${condition}?provider=${provider}`);
+  return r.ok ? r.json() : null;
 }
 
 export const STATUS_META: Record<NeedStatus, { label: string; color: string; ring: string }> = {

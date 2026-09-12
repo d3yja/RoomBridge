@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { listScenarios, runDemo, Need, RunView, ScenarioView, NeedStatus } from "@/lib/api";
+import {
+  listScenarios, runDemo, getAvailability, Need, RunView, ScenarioView, NeedStatus,
+  Provider, Availability,
+} from "@/lib/api";
 import { StatusDot } from "@/components/Registers";
 import { AgreementCard } from "@/components/AgreementCard";
 
@@ -29,12 +32,16 @@ export default function DemoPage() {
   const [conditions, setConditions] = useState<Record<string, RunView> | null>(null);
   const [loading, setLoading] = useState(false);
   const [highlight, setHighlight] = useState<string | null>(null);
+  const [provider, setProvider] = useState<Provider>("mock");
+  const [avail, setAvail] = useState<Availability | null>(null);
 
   useEffect(() => { listScenarios().then(setScenarios); }, []);
+  useEffect(() => { getAvailability(sid).then(setAvail); }, [sid, conditions]);
 
   async function run() {
     setLoading(true); setConditions(null); setHighlight(null);
-    const res = await runDemo(sid);
+    // View-only by default: shows cached runs for the chosen provider, never spends.
+    const res = await runDemo(sid, provider, false);
     setScenario(res.scenario); setConditions(res.conditions);
     setLoading(false);
   }
@@ -51,10 +58,29 @@ export default function DemoPage() {
             <option key={s.scenario_id} value={s.scenario_id}>{s.title}</option>
           ))}
         </select>
+        <div className="flex rounded-md overflow-hidden border border-[#d4d0c4]">
+          {(["mock", "openrouter"] as Provider[]).map((p) => {
+            const has = p === "mock" ? avail?.has_mock : avail?.has_openrouter;
+            return (
+              <button key={p} onClick={() => { setProvider(p); setConditions(null); }}
+                className={`px-3 py-1.5 text-sm ${provider === p ? "bg-ink text-white" : "bg-white text-neutral-600"}`}
+                title={has ? "cached runs available" : "no cached runs for this provider yet"}>
+                {p === "mock" ? "Mock" : "OpenRouter"}
+                {avail && !has && <span className="ml-1 text-[10px] opacity-60">∅</span>}
+              </button>
+            );
+          })}
+        </div>
         <button onClick={run} disabled={loading}
           className="rounded-md bg-ink text-white px-4 py-1.5 text-sm font-medium disabled:opacity-50">
-          {loading ? "Running…" : "Run all four conditions"}
+          {loading ? "Loading…" : "View results"}
         </button>
+        {avail && (
+          <span className="text-[11px] text-neutral-400">
+            {avail.n_runs} run{avail.n_runs === 1 ? "" : "s"} cached
+            {avail.models.length > 0 && ` · ${avail.models.filter((m) => m !== "mock").join(", ") || "mock"}`}
+          </span>
+        )}
         {conditions && needs.length > 0 && (
           <div className="flex items-center gap-2 ml-2">
             <span className="text-xs text-neutral-500">Reveal the loss:</span>
@@ -79,6 +105,18 @@ export default function DemoPage() {
               const loss = silentLoss(run);
               const r = nrr(run);
               const isD = letter === "D";
+              if (run.no_run) {
+                return (
+                  <div key={letter} className="rounded-lg border border-dashed border-[#d4d0c4] bg-white p-3">
+                    <div className="font-semibold text-sm">
+                      <span className="font-mono text-neutral-400">{letter}</span> {COND_LABEL[letter]}
+                    </div>
+                    <p className="mt-6 text-[12px] text-neutral-400 text-center">
+                      no cached {provider === "openrouter" ? "OpenRouter" : "mock"} run
+                    </p>
+                  </div>
+                );
+              }
               return (
                 <div key={letter} className={`rounded-lg border bg-white p-3
                   ${isD ? "border-preserved ring-1 ring-preserved/30" : "border-[#e5e2d8]"}`}>
@@ -116,13 +154,17 @@ export default function DemoPage() {
 
           <div className="mt-4 flex items-center gap-6 text-sm">
             <span className="text-neutral-500">Silent loss:</span>
-            {order.map((l) => (
-              <span key={l} className="font-mono">
-                {l} <b style={{ color: silentLoss(conditions[l]) > 0 ? "#cf222e" : "#1a7f37" }}>
-                  {conditions[l].escalated ? "esc" : silentLoss(conditions[l])}
-                </b>
-              </span>
-            ))}
+            {order.map((l) => {
+              const run = conditions[l];
+              const val = run.no_run ? "–" : run.escalated ? "esc" : silentLoss(run);
+              return (
+                <span key={l} className="font-mono">
+                  {l} <b style={{ color: !run.no_run && !run.escalated && silentLoss(run) > 0 ? "#cf222e" : "#1a7f37" }}>
+                    {val}
+                  </b>
+                </span>
+              );
+            })}
           </div>
 
           {highlight && (

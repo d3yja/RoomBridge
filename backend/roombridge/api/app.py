@@ -74,29 +74,47 @@ def _resolve_condition(name: str) -> Condition:
     return _COND_MAP[name]
 
 
-def _cached_run(req: RunRequest) -> str | None:
-    """Return an existing complete run id for this exact config (demo replay from cache)."""
-    cond = _resolve_condition(req.condition)
-    model = req.model or ("mock" if req.provider == "mock" else settings.default_model)
+def _find_cached(scenario_id: str, condition: str, provider: str,
+                 seed: int | None = None, model: str | None = None) -> str | None:
+    """Most recent complete/escalated run matching this config. Matches by provider FAMILY
+    so real runs are found whatever exact slug they used: provider 'mock' -> model=='mock';
+    anything else -> the latest run whose model is not 'mock' (or an explicit model if given)."""
+    cond = _resolve_condition(condition)
     with session_scope() as s:
         stmt = select(M.Run).where(
-            M.Run.scenario_id == req.scenario_id, M.Run.condition == cond,
-            M.Run.model == model, M.Run.status.in_(["complete", "escalated"]))
-        if req.seed is not None:
-            stmt = stmt.where(M.Run.seed == req.seed)
+            M.Run.scenario_id == scenario_id, M.Run.condition == cond,
+            M.Run.status.in_(["complete", "escalated"]))
+        if model:
+            stmt = stmt.where(M.Run.model == model)
+        elif provider == "mock":
+            stmt = stmt.where(M.Run.model == "mock")
+        else:
+            stmt = stmt.where(M.Run.model != "mock")
+        if seed is not None:
+            stmt = stmt.where(M.Run.seed == seed)
         existing = s.exec(stmt.order_by(M.Run.started_at.desc())).first()
     return existing.run_id if existing else None
 
 
+def _cached_run(req: RunRequest) -> str | None:
+    return _find_cached(req.scenario_id, req.condition, req.provider, req.seed, req.model)
+
+
 @app.post("/runs")
-def create_run(req: RunRequest, use_cache: bool = True) -> dict:
+def create_run(req: RunRequest, use_cache: bool = True, cache_only: bool = False) -> dict:
     from ..conditions.registry import run_condition
     from ..metrics.compute import compute_run_metrics
 
-    if use_cache:
+    if use_cache or cache_only:
         cached = _cached_run(req)
         if cached:
             return {"cached": True, **run_view(cached)}
+    if cache_only:
+        # View-only: never spend money when there is no cached run for this provider.
+        return {"cached": False, "no_run": True, "condition": req.condition,
+                "scenario_id": req.scenario_id, "status": "missing", "escalated": False,
+                "audits": [], "assumptions": [], "escalation": None, "metrics": {},
+                "messages": [], "chosen_agreement": None, "final_agreement_text": None}
 
     cond = _resolve_condition(req.condition)
     try:
@@ -157,14 +175,44 @@ class DemoRequest(BaseModel):
     scenario_id: str
     provider: str = "mock"
     seed: int | None = None
+    live: bool = False          # False = view cached only (never spends); True = run if missing
 
 
 @app.post("/demo")
 def demo(req: DemoRequest) -> dict:
-    """Run all four conditions (from cache when available) for the side-by-side compare."""
+    """Four conditions side by side. Defaults to VIEW-ONLY (cached): it shows whatever runs
+    already exist for the chosen provider and never triggers new inference. Pass live=true to
+    run missing conditions on the fly (this can call the model and cost money)."""
     out = {}
     for letter in ["A", "B", "C", "D"]:
         out[letter] = create_run(
             RunRequest(scenario_id=req.scenario_id, condition=letter,
-                       provider=req.provider, seed=req.seed), use_cache=True)
+                       provider=req.provider, seed=req.seed),
+            use_cache=True, cache_only=not req.live)
     return {"scenario": scenario_view(req.scenario_id), "conditions": out}
+
+
+@app.get("/runs/latest/{scenario_id}/{condition}")
+def latest_run(scenario_id: str, condition: str, provider: str = "mock") -> dict:
+    """Latest cached run for one scenario+condition+provider (workbench 'view cached')."""
+    rid = _find_cached(scenario_id, condition, provider)
+    if not rid:
+        raise HTTPException(404, "no cached run for this provider")
+    return {"cached": True, **run_view(rid)}
+
+
+@app.get("/runs/available/{scenario_id}")
+def available(scenario_id: str) -> dict:
+    """Which providers have runs for this scenario, and the distinct models seen -- lets the
+    UI point you at data you actually have rather than guessing."""
+    with session_scope() as s:
+        runs = s.exec(select(M.Run).where(
+            M.Run.scenario_id == scenario_id,
+            M.Run.status.in_(["complete", "escalated"]))).all()
+    models = sorted({r.model for r in runs})
+    return {
+        "has_mock": any(r.model == "mock" for r in runs),
+        "has_openrouter": any(r.model != "mock" for r in runs),
+        "models": models,
+        "n_runs": len(runs),
+    }
