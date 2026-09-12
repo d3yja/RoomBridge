@@ -1,0 +1,61 @@
+export const API = "/api";
+
+export type NeedStatus =
+  | "preserved" | "partially_preserved" | "unresolved" | "not_addressed" | "violated";
+
+export interface Need {
+  need_id: string; owner_id: string; verbatim: string; normalized: string;
+  category: string; stated_importance: number | null; stated_as_boundary: boolean;
+}
+export interface ScenarioView {
+  scenario_id: string; title: string; participants: { participant_id: string;
+    display_name: string; background_context: string }[];
+  needs: Need[]; notes: string; expected_observations: string[];
+  gold_audit: Record<string, string>; should_escalate: boolean;
+}
+export interface Audit {
+  need_id: string; phase: string; status: NeedStatus; evidence_quote: string | null;
+  rationale: string; self_consistency: number; samples: any[];
+}
+export interface RunView {
+  run_id: string; condition: string; status: string; escalated: boolean;
+  final_agreement_text: string | null; culture_diff_rate: number | null;
+  chosen_agreement: { terms: { text: string; addresses_need_ids: string[] }[];
+    rationale: string } | null;
+  audits: Audit[];
+  assumptions: { text: string; type: string; detected_by: string; severity: string }[];
+  escalation: { category: string; triggered_by: string; reason: string;
+    triggering_span: string; not_attempted: string[]; suggested_support: string } | null;
+  metrics: Record<string, number | Record<string, number>>;
+  messages: { round: number; agent: string; content: string }[];
+  cached?: boolean;
+}
+
+export async function listScenarios() {
+  return (await fetch(`${API}/scenarios`)).json();
+}
+export async function getScenario(id: string): Promise<ScenarioView> {
+  return (await fetch(`${API}/scenarios/${id}`)).json();
+}
+export async function runDemo(scenario_id: string): Promise<{
+  scenario: ScenarioView; conditions: Record<string, RunView>;
+}> {
+  return (await fetch(`${API}/demo`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scenario_id, provider: "mock" }),
+  })).json();
+}
+export async function runOne(scenario_id: string, condition: string): Promise<RunView> {
+  return (await fetch(`${API}/runs`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scenario_id, condition, provider: "mock" }),
+  })).json();
+}
+
+export const STATUS_META: Record<NeedStatus, { label: string; color: string; ring: string }> = {
+  preserved: { label: "preserved", color: "#1a7f37", ring: "#1a7f37" },
+  partially_preserved: { label: "partial", color: "#bf8700", ring: "#bf8700" },
+  unresolved: { label: "unresolved", color: "#8c6d1f", ring: "#8c6d1f" },
+  not_addressed: { label: "not addressed", color: "#cf222e", ring: "#cf222e" },
+  violated: { label: "violated", color: "#cf222e", ring: "#cf222e" },
+};

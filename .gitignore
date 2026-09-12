@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# Env & secrets
+.env
+.env.local
+*.local
+
+# Data (runtime DB + exports are never committed)
+data/runs.db
+data/runs.db-*
+data/exports/*
+!data/exports/.gitkeep
+
+# OS
+.DS_Store

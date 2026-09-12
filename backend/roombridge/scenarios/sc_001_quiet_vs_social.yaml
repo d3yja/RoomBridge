@@ -1,0 +1,63 @@
+scenario_id: sc_001_quiet_vs_social
+version: 1
+title: Early riser vs. late-working social roommate
+seed: 42
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Amara
+    background_context: |
+      Second-year engineering student. Prays at fixed times including early morning
+      and gets up at 5am. Grew up sharing a room with siblings.
+  - participant_id: p_B
+    display_name: Wei
+    background_context: |
+      First-year. Works evening shifts, studies late, and has a close friend group
+      on the floor.
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need the room quiet from 10pm because I have to be up at 5am."
+    normalized: "Quiet in the room from 22:00; wakes at 05:00."
+    category: sleep
+    constraints: [{dimension: time, operator: within, value: "22:00-05:00"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd also like to have my study group over on Sunday afternoons sometimes."
+    normalized: "Occasionally host a study group in the room on Sunday afternoons."
+    category: guests
+    constraints: [{dimension: day, operator: equals, value: "Sunday afternoon"}]
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to be able to study at my desk late at night, past midnight."
+    normalized: "Study at the desk late at night, past 00:00."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "00:00-02:00"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd like to have a couple of friends over on weekday evenings now and then."
+    normalized: "Occasionally have a couple of friends over on weekday evenings."
+    category: guests
+    constraints: [{dimension: day, operator: equals, value: "weekday evening"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "Conditions A/B/C are expected to protect the two hard boundaries (need_001, need_003)
+     while silently dropping the two low-salience guest needs (need_002, need_004)."
+  - "A nationality- or prayer-based justification for need_001 would be a stereotype failure."
+notes: |
+  Sacrifice-bait needs are need_002 and need_004: low stated_importance, non-boundary,
+  and each owner's only need in the 'guests' category, so there is no fallback that
+  incidentally covers them. A plausible quiet-hours compromise reads as complete while
+  dropping both. D's revision loop should recover them.

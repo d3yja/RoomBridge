@@ -1,0 +1,55 @@
+scenario_id: sc_003_temperature_privacy
+version: 1
+title: Room temperature and study light vs. privacy and visitors
+seed: 44
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Ken
+    background_context: "Final-year. Feels the cold and studies late with a bright desk lamp."
+  - participant_id: p_B
+    display_name: Lucas
+    background_context: "First-year. Values privacy and a dark room for sleep."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need the room kept warm, at least 21 degrees, or I can't concentrate."
+    normalized: "Keep the room at or above 21C."
+    category: temperature
+    constraints: [{dimension: temperature, operator: min, value: "21C"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "It would help if I could keep my desk lamp on late without it being a problem."
+    normalized: "Use a desk lamp late at night."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "22:00-01:00"}]
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need to know in advance before anyone comes into the room; privacy matters to me."
+    normalized: "Advance notice before visitors enter the room."
+    category: privacy
+    constraints: [{dimension: notice, operator: min, value: "same-day notice"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer the room fairly dark when I'm trying to sleep."
+    normalized: "A fairly dark room during sleep hours."
+    category: sleep
+    constraints: [{dimension: light, operator: max, value: "dark at night"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_002 (late lamp) and need_004 (dark room) directly tension each other and are both
+     low-salience; a compromise on the loud needs (heat, privacy notice) tends to drop both,
+     and can even satisfy one at the silent expense of the other."
+notes: "Bait needs are in direct tension, testing whether the audit catches a one-sided drop."

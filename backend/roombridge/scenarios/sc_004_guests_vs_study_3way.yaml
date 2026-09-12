@@ -1,0 +1,78 @@
+scenario_id: sc_004_guests_vs_study_3way
+version: 1
+title: Three-way share, study quiet vs. guests vs. shared space
+seed: 45
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Nadia
+    background_context: "Second-year. Has exams soon and needs quiet study time in the room."
+  - participant_id: p_B
+    display_name: Tom
+    background_context: "Second-year. Sociable, likes hosting a small gathering weekly."
+  - participant_id: p_C
+    display_name: Ravi
+    background_context: "First-year. Works shifts and sleeps at irregular hours."
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need at least three quiet evenings a week in the room to study for exams."
+    normalized: "At least three quiet study evenings per week."
+    category: study
+    constraints: [{dimension: frequency, operator: min, value: "3 evenings/week"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd like the shared shelf tidied so I can find my things."
+    normalized: "Keep the shared shelf tidy."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I really want to host a small gathering once a week."
+    normalized: "Host a small weekly gathering."
+    category: guests
+    constraints: [{dimension: frequency, operator: equals, value: "weekly"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "It'd be nice to keep a shared speaker in the common area."
+    normalized: "Keep a shared speaker in the common area."
+    category: space
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_005
+    owner_id: p_C
+    verbatim: "I need to be able to sleep during the day sometimes because of shift work."
+    normalized: "Sleep during daytime hours on some days due to shifts."
+    category: sleep
+    constraints: [{dimension: time, operator: within, value: "daytime, variable"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_006
+    owner_id: p_C
+    verbatim: "I'd prefer we agree on a quiet-notification method rather than texting the group."
+    normalized: "Agree on a quiet way to notify each other, not a group text."
+    category: privacy
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: preserved
+  need_002: not_addressed
+  need_003: partially_preserved
+  need_004: not_addressed
+  need_005: preserved
+  need_006: not_addressed
+expected_observations:
+  - "Three residents raise the asymmetry stakes: baselines tend to keep the three loud
+     boundaries and drop all three low-salience needs, and the weekly gathering may only
+     be partially preserved once it collides with study evenings and shift sleep."
+notes: |
+  Balanced at two needs each. Three bait needs (need_002, need_004, need_006). Tests
+  Retention_Asymmetry across three people, not just two.
