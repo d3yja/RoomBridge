@@ -16,14 +16,15 @@ make the loss *happen* under baseline conditions, make it *measurable*, and make
 
 The same scenario runs through all four; the comparison is the experiment.
 
-| | Condition | What its generator sees |
-|---|---|---|
-| A | Generic LLM | raw statements only |
-| B | Context-informed | statements + an explanatory context block |
-| C | Ordinary multi-agent deliberation | perspective agents + mediator, multi-round, no needs objects, no audit loop |
-| D | **RoomBridge** | needs → conflicts → context → K candidates → select → **independent audit** → bounded revision |
+|   | Condition                         | What its generator sees                                                                                   |
+| - | --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A | Generic LLM                       | raw statements only                                                                                       |
+| B | Context-informed                  | statements + an explanatory context block                                                                 |
+| C | Ordinary multi-agent deliberation | perspective agents + mediator, multi-round, no needs objects, no audit loop                               |
+| D | **RoomBridge**              | needs → conflicts → context → K candidates → select →**independent audit** → bounded revision |
 
 Two invariants make the comparison valid:
+
 1. the **gold need set is fixed per scenario**, outside the condition, so all four are audited against the same needs;
 2. the **auditor is identical** for all four and sees only `(need, agreement_text)` — never the mediator's rationale, the transcript, or which condition produced the agreement.
 
