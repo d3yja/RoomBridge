@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -17,8 +18,12 @@ class Settings(BaseSettings):
         env_prefix="ROOMBRIDGE_", env_file=str(REPO_ROOT / ".env"), extra="ignore"
     )
 
-    # OpenRouter (read from OPENROUTER_API_KEY, no prefix).
-    openrouter_api_key: str = ""
+    # OpenRouter key. The alias makes it readable from a bare OPENROUTER_API_KEY in the
+    # .env file or the shell (no ROOMBRIDGE_ prefix), which is what everyone expects.
+    openrouter_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("OPENROUTER_API_KEY", "ROOMBRIDGE_OPENROUTER_API_KEY"),
+    )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
     # Default backbone for mediation steps and for the auditor.
@@ -45,13 +50,8 @@ class Settings(BaseSettings):
 
 
 def load_settings() -> "Settings":
-    import os
-
-    s = Settings()
-    # OPENROUTER_API_KEY has no ROOMBRIDGE_ prefix; pull it explicitly.
-    if not s.openrouter_api_key:
-        s.openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
-    return s
+    # The OPENROUTER_API_KEY alias handles both the .env file and the shell environment.
+    return Settings()
 
 
 settings = load_settings()

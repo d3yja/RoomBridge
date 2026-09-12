@@ -38,17 +38,54 @@ class Provider(Protocol):
     ) -> CallResult: ...
 
 
-_JSON_BLOCK = re.compile(r"\{.*\}|\[.*\]", re.DOTALL)
+def _balanced_candidates(text: str):
+    """Yield each complete top-level JSON object/array via string-aware bracket balancing,
+    so stray braces in prose and braces inside strings don't confuse the scan."""
+    start = None
+    open_ch = close_ch = ""
+    depth = 0
+    instr = esc = False
+    for i, ch in enumerate(text):
+        if start is None:
+            if ch in "{[":
+                start, open_ch, close_ch, depth = i, ch, ("}" if ch == "{" else "]"), 1
+            continue
+        if instr:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                instr = False
+            continue
+        if ch == '"':
+            instr = True
+        elif ch == open_ch:
+            depth += 1
+        elif ch == close_ch:
+            depth -= 1
+            if depth == 0:
+                yield text[start : i + 1]
+                start = None
 
 
 def extract_json(text: str) -> str:
-    """Pull the first JSON object/array out of a possibly chatty response.
-    Replaces MAD's \\boxed{} regex (utils.py:42) with something that survives real models."""
+    """Pull the first PARSEABLE JSON object/array out of a possibly chatty response.
+    Replaces MAD's \\boxed{} regex (utils.py:42) with something that survives real models:
+    tries each balanced candidate and returns the first that actually json-parses."""
     text = text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?", "", text).rsplit("```", 1)[0].strip()
-    m = _JSON_BLOCK.search(text)
-    return m.group(0) if m else text
+    first = None
+    for cand in _balanced_candidates(text):
+        if first is None:
+            first = cand
+        try:
+            json.loads(cand)
+            return cand
+        except json.JSONDecodeError:
+            continue
+    return first if first is not None else text
 
 
 def parse_into(text: str, schema: Type[T]) -> T:
