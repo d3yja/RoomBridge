@@ -10,6 +10,7 @@ from ..domain.db import session_scope
 from sqlmodel import select
 from ..domain.enums import Condition
 from ..pipeline.executor import StepExecutor
+from ..policies.loader import load_rules
 from ..providers.base import LLMError, StructuredProvider
 from .base import Recorder, RunContext, new_run_id
 from .pipelines import condition_a, condition_b, condition_c, condition_d
@@ -44,7 +45,7 @@ def build_run_context(scenario: M.Scenario, needs: list[M.Need], condition: Cond
         run_id=run_id, scenario_id=scenario.scenario_id, condition=condition, seed=seed,
         model=model, auditor_model=auditor_model, needs=contract_needs,
         participants=scenario.participants, statements_by_owner=statements_by_owner,
-        all_statements=all_statements,
+        all_statements=all_statements, hall_rules=load_rules(),
     )
 
 

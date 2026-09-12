@@ -24,6 +24,7 @@ def run_record(run_id: str) -> dict:
         candidates = s.exec(select(M.CandidateAgreement).where(M.CandidateAgreement.run_id == run_id)).all()
         audits = s.exec(select(M.NeedAudit).where(M.NeedAudit.run_id == run_id)).all()
         assumptions = s.exec(select(M.Assumption).where(M.Assumption.run_id == run_id)).all()
+        policy_audits = s.exec(select(M.PolicyAudit).where(M.PolicyAudit.run_id == run_id)).all()
         escalations = s.exec(select(M.EscalationEvent).where(M.EscalationEvent.run_id == run_id)).all()
         metrics = s.exec(select(M.MetricResult).where(M.MetricResult.run_id == run_id)).all()
 
@@ -55,6 +56,10 @@ def run_record(run_id: str) -> dict:
             "assumptions": [{"text": a.text, "type": a.assumption_type,
                              "detected_by": a.detected_by, "severity": a.severity.value}
                             for a in assumptions],
+            "policy_audits": [{"rule_id": p.rule_id, "status": p.status, "type": p.type,
+                               "title": p.title, "source": p.source,
+                               "evidence_quote": p.evidence_quote, "detected_by": p.detected_by}
+                              for p in policy_audits],
             "escalation_events": [{"triggered_by": e.triggered_by,
                                    "category": e.category.value if e.category else None,
                                    "triggering_span": e.triggering_span, "reason": e.reason,
@@ -72,7 +77,9 @@ def run_record(run_id: str) -> dict:
 
 _FLAT_METRICS = ["nrr", "silent_loss_count", "silent_loss_rate", "retention_asymmetry",
                  "mean_self_consistency", "gold_status_match", "candidate_spread_pairwise",
-                 "candidate_spread_mst", "position_drift", "escalated"]
+                 "candidate_spread_mst", "position_drift",
+                 "policy_compliance_rate", "policy_violation_count", "policy_hard_violation_count",
+                 "escalated"]
 
 
 def export_all(tag: str | None = None) -> tuple[str, str]:

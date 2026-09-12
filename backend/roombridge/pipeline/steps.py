@@ -28,14 +28,23 @@ def identify_conflicts(ex: StepExecutor, needs: list[C.Need]) -> list[C.Conflict
 
 
 def generate_agreement(
-    ex: StepExecutor, needs, conflicts, context_notes, *, seed=None, failing_need_ids=None,
+    ex: StepExecutor, needs, conflicts, context_notes, *, seed=None,
+    failing_need_ids=None, failing_rule_ids=None, hall_rules=None,
 ) -> C.Agreement:
+    from ..policies.loader import rules_for_prompt
+
     banner = ""
-    if failing_need_ids:
-        banner = ("REVISION: the following needs were found NOT preserved and MUST be "
-                  f"addressed now. FAILING_NEED_IDS: {list(failing_need_ids)}\n")
+    if failing_need_ids or failing_rule_ids:
+        banner = "REVISION: fix the following and re-draft.\n"
+        if failing_need_ids:
+            banner += ("These needs were NOT preserved and MUST be addressed now. "
+                       f"FAILING_NEED_IDS: {list(failing_need_ids)}\n")
+        if failing_rule_ids:
+            banner += ("These agreement terms BREAK hard hall rules and MUST be removed or "
+                       f"reframed to comply. VIOLATED_RULE_IDS: {list(failing_rule_ids)}\n")
     ctx = _ctx("generate_agreement", needs=needs, conflicts=conflicts,
-               context_notes=context_notes, revision_banner=banner)
+               context_notes=context_notes, revision_banner=banner,
+               hall_rules=rules_for_prompt(hall_rules) if hall_rules else [])
     return ex.run_object("generate_agreement", ctx, C.Agreement, seed=seed, temperature=1.0)
 
 

@@ -1,0 +1,65 @@
+scenario_id: sc_007_policy_conflict
+version: 1
+title: In-room cooking vs. hall rules (policy conflict)
+seed: 48
+should_escalate: false
+participants:
+  - participant_id: p_A
+    display_name: Priya
+    background_context: |
+      Third-year on a tight budget who is used to cooking her own dinner at home.
+  - participant_id: p_B
+    display_name: Sam
+    background_context: |
+      Second-year, sensitive to kitchen smells and keen to keep the room pleasant.
+needs:
+  - need_id: need_001
+    owner_id: p_A
+    verbatim: "I need to cook my own dinner in our room most weeknights to save money."
+    normalized: "Cook own dinner most weeknights to save money."
+    category: food
+    constraints: [{dimension: frequency, operator: equals, value: "most weeknights"}]
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_002
+    owner_id: p_A
+    verbatim: "I'd also like to keep the room fairly warm in the evenings."
+    normalized: "Keep the room fairly warm in the evenings."
+    category: temperature
+    constraints: []
+    stated_importance: 2
+    stated_as_boundary: false
+  - need_id: need_003
+    owner_id: p_B
+    verbatim: "I need the room kept free of food smells and grease."
+    normalized: "Keep the room free of food smells and grease."
+    category: cleanliness
+    constraints: []
+    stated_importance: 5
+    stated_as_boundary: true
+  - need_id: need_004
+    owner_id: p_B
+    verbatim: "I'd prefer we agree on a quiet study window on weeknights."
+    normalized: "Agree a quiet study window on weeknights."
+    category: study
+    constraints: [{dimension: time, operator: within, value: "weeknight evening"}]
+    stated_importance: 2
+    stated_as_boundary: false
+gold_audit:
+  need_001: partially_preserved
+  need_002: not_addressed
+  need_003: preserved
+  need_004: not_addressed
+expected_observations:
+  - "need_001 collides with a HARD hall rule (no cooking in rooms/suites, HMT Handbook
+     p.11 §C.2(6)). The system must surface this policy-conflict, never silently drop it."
+  - "Condition A (no rules) is expected to echo 'cook dinner in our room' verbatim -> a hall
+     policy VIOLATION, even though it 'preserves' the need. Conditions B/C/D, fed the rules,
+     should meet the need compliantly (shared pantry / common kitchen) -> no violation."
+  - "Policy compliance is a SEPARATE axis from needs retention: A can score high on need
+     retention while failing compliance; D respects the rule at a small cost to literal
+     preservation (partially_preserved)."
+notes: |
+  Demonstrates the policy layer: same cooking need, but A breaks HR_NO_COOKING while the
+  rules-fed conditions reframe it. Also carries the usual low-salience baits (need_002,
+  need_004) so silent-loss and policy-compliance can be read on one scenario.

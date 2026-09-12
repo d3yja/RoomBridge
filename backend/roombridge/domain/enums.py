@@ -41,6 +41,7 @@ class AssumptionType(str, Enum):
     UNSTATED_PREFERENCE = "unstated_preference"    # invented a need nobody stated
     FACTUAL_INVENTION = "factual_invention"        # invented a fact about the situation
     IMPORTANCE_RANKING = "importance_ranking"      # ranked needs residents did not rank
+    POLICY_CONFLICT = "policy_conflict"            # a stated need collides with a hall rule
 
 
 class Severity(str, Enum):
@@ -56,8 +57,20 @@ class EscalationCategory(str, Enum):
     MENTAL_HEALTH = "mental_health"
     COERCION = "coercion"
     REPEATED_UNRESOLVED = "repeated_unresolved"
+    CRIMINAL = "criminal"
     OUT_OF_SCOPE = "out_of_scope"
 
 
 class Provenance(str, Enum):
     STATED = "stated"     # needs are always stated; inferred content is an Assumption instead
+
+
+class PolicyStatus(str, Enum):
+    COMPLIANT = "compliant"
+    VIOLATED = "violated"
+    NOT_APPLICABLE = "not_applicable"
+    ADVISORY = "advisory"          # a guideline worth noting, neither pass nor fail
+
+
+# Statuses that require a verbatim quote of the offending term (parallel to needs audit).
+POLICY_EVIDENCE_REQUIRED = {PolicyStatus.VIOLATED}

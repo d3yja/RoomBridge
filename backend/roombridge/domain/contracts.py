@@ -12,6 +12,7 @@ from .enums import (
     AssumptionType,
     EscalationCategory,
     NeedStatus,
+    PolicyStatus,
     Provenance,
     Severity,
 )
@@ -117,3 +118,25 @@ class PriorityVector(BaseModel):
 
     owner_id: str
     weights: dict[str, float] = Field(default_factory=dict)  # need_id -> weight in [0,1]
+
+
+class PolicyRule(BaseModel):
+    """One institutional hall rule. Rendered into prompts as a compact block; the raw
+    handbook PDF is never sent to a model."""
+
+    rule_id: str
+    category: str
+    type: str                           # "hard" | "guideline"
+    title: str
+    rule_text: str
+    dimensions: list[str] = Field(default_factory=list)
+    source: str = ""                    # handbook citation, e.g. "HMT Handbook p.11 §C.2(6)"
+
+
+class PolicyFinding(BaseModel):
+    """One compliance verdict for one rule against one agreement text."""
+
+    rule_id: str
+    status: PolicyStatus
+    evidence_quote: str | None = None   # verbatim offending term for a `violated` verdict
+    rationale: str = ""

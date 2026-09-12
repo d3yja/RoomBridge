@@ -54,7 +54,7 @@ PROMPTS: dict[str, PromptSpec] = {
         {"needs"}, None, item=C.Conflict),
     "generate_agreement": _spec(
         "generate_agreement", "v1", "generate_agreement",
-        {"needs", "conflicts", "context_notes", "revision_banner"}, C.Agreement),
+        {"needs", "conflicts", "context_notes", "revision_banner", "hall_rules"}, C.Agreement),
     "generate_generic": _spec(
         "generate_generic", "v1", "generate_agreement",
         {"statements"}, C.Agreement),
@@ -64,6 +64,9 @@ PROMPTS: dict[str, PromptSpec] = {
     "audit_need": _spec(
         "audit_need", "v1", "audit_need",
         {"need", "agreement_text"}, C.AuditVerdict),
+    "check_policy": _spec(
+        "check_policy", "v1", "check_policy",
+        {"agreement_text", "rules"}, None, item=C.PolicyFinding),
     "check_assumptions": _spec(
         "check_assumptions", "v1", "check_assumptions",
         {"needs", "agreement_text"}, None, item=C.AssumptionFinding),

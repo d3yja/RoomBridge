@@ -35,6 +35,7 @@ class RunContext:
     participants: list[dict]
     statements_by_owner: dict[str, str]
     all_statements: str
+    hall_rules: list = None  # list[PolicyRule]; institutional policy layer (plan addendum)
 
 
 class Recorder:
@@ -90,6 +91,14 @@ class Recorder:
             s.add(M.NeedAudit(run_id=self.run_id, phase=phase, **audit))
         self.emit("audit", {"phase": phase, "need_id": audit["need_id"],
                             "status": audit["status"].value if hasattr(audit["status"], "value") else audit["status"]})
+
+    def record_policy_audit(self, rows: list[dict]) -> None:
+        with session_scope() as s:
+            for r in rows:
+                s.add(M.PolicyAudit(run_id=self.run_id, **r))
+        violations = [r for r in rows if r["status"] == "violated"]
+        if violations:
+            self.emit("policy", {"violations": [r["rule_id"] for r in violations]})
 
     def record_assumptions(self, findings, detected_by: str) -> None:
         with session_scope() as s:

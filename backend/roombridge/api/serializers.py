@@ -40,6 +40,7 @@ def run_view(run_id: str) -> dict:
         cands = s.exec(select(M.CandidateAgreement).where(M.CandidateAgreement.run_id == run_id)).all()
         assumptions = s.exec(select(M.Assumption).where(M.Assumption.run_id == run_id)).all()
         esc = s.exec(select(M.EscalationEvent).where(M.EscalationEvent.run_id == run_id)).all()
+        policy = s.exec(select(M.PolicyAudit).where(M.PolicyAudit.run_id == run_id)).all()
         metrics = s.exec(select(M.MetricResult).where(M.MetricResult.run_id == run_id)).all()
         messages = s.exec(select(M.AgentMessage).where(M.AgentMessage.run_id == run_id)).all()
     chosen = next((c for c in cands if c.chosen), None)
@@ -57,6 +58,10 @@ def run_view(run_id: str) -> dict:
         "assumptions": [{"text": a.text, "type": a.assumption_type,
                          "detected_by": a.detected_by, "severity": a.severity.value}
                         for a in assumptions],
+        "policy_audits": [{"rule_id": p.rule_id, "status": p.status, "type": p.type,
+                           "title": p.title, "source": p.source,
+                           "evidence_quote": p.evidence_quote, "detected_by": p.detected_by}
+                          for p in policy],
         "escalation": ({"category": esc[0].category.value if esc[0].category else None,
                         "triggered_by": esc[0].triggered_by, "reason": esc[0].reason,
                         "triggering_span": esc[0].triggering_span,

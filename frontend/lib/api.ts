@@ -24,6 +24,7 @@ export interface RunView {
     rationale: string } | null;
   audits: Audit[];
   assumptions: { text: string; type: string; detected_by: string; severity: string }[];
+  policy_audits?: PolicyAudit[];
   escalation: { category: string; triggered_by: string; reason: string;
     triggering_span: string; not_attempted: string[]; suggested_support: string } | null;
   metrics: Record<string, number | Record<string, number>>;
@@ -33,6 +34,20 @@ export interface RunView {
 }
 
 export type Provider = "mock" | "openrouter";
+
+export interface PolicyAudit {
+  rule_id: string; status: "compliant" | "violated" | "not_applicable" | "advisory";
+  type: "hard" | "guideline"; title: string; source: string;
+  evidence_quote: string | null; detected_by: string;
+}
+
+export function policyViolations(run: RunView): PolicyAudit[] {
+  return (run.policy_audits ?? []).filter((p) => p.status === "violated");
+}
+export function policyCompliance(run: RunView): number | null {
+  const v = run.metrics?.policy_compliance_rate;
+  return typeof v === "number" ? v : null;
+}
 
 export interface Availability {
   has_mock: boolean; has_openrouter: boolean; models: string[]; n_runs: number;

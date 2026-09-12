@@ -14,6 +14,7 @@ from ..domain.enums import NeedStatus
 from .pairwise import compute_pairwise
 from .retention import retention_metrics
 from .structural import compute_mst_span
+from .policy import policy_metrics
 from .drift import position_drift
 
 
@@ -45,6 +46,7 @@ def compute_run_metrics(run_id: str) -> dict:
         needs = s.exec(select(M.Need).where(M.Need.scenario_id == run.scenario_id)).all()
         finals = s.exec(select(M.NeedAudit).where(
             M.NeedAudit.run_id == run_id, M.NeedAudit.phase == "final")).all()
+        policy_rows = s.exec(select(M.PolicyAudit).where(M.PolicyAudit.run_id == run_id)).all()
         gold = dict(scenario.gold_audit or {})
         owners = {n.need_id: n.owner_id for n in needs}
         escalated = run.escalated
@@ -59,6 +61,9 @@ def compute_run_metrics(run_id: str) -> dict:
         results["mean_self_consistency"] = (
             sum(a.self_consistency for a in finals) / len(finals) if finals else 0.0
         )
+        if policy_rows:
+            results.update(policy_metrics(
+                [{"rule_id": r.rule_id, "type": r.type, "status": r.status} for r in policy_rows]))
         # Match against the scenario's pre-registered expected (baseline) statuses.
         # This is phenomenon-confirmation, NOT pure auditor accuracy: for baseline
         # conditions a high match means the predicted silent losses were detected; for D,

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import {
-  listScenarios, runDemo, getAvailability, Need, RunView, ScenarioView, NeedStatus,
-  Provider, Availability,
+  listScenarios, runDemo, getAvailability, policyViolations, policyCompliance,
+  Need, RunView, ScenarioView, NeedStatus, Provider, Availability,
 } from "@/lib/api";
 import { StatusDot } from "@/components/Registers";
 import { AgreementCard } from "@/components/AgreementCard";
@@ -147,19 +147,44 @@ export default function DemoPage() {
                                 : "✓ all needs preserved"}
                     </div>
                   )}
+                  {!run.escalated && (() => {
+                    const pv = policyViolations(run);
+                    return (
+                      <div className={`mt-1 text-[12px] font-medium ${pv.length > 0 ? "text-lost" : "text-preserved"}`}>
+                        {pv.length > 0
+                          ? `⚠ breaks ${pv.length} hall rule${pv.length > 1 ? "s" : ""}: ${pv.map((p) => p.rule_id.replace("HR_", "")).join(", ")}`
+                          : "✓ hall-compliant"}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
           </div>
 
           <div className="mt-4 flex items-center gap-6 text-sm">
-            <span className="text-neutral-500">Silent loss:</span>
+            <span className="text-neutral-500 w-24">Silent loss:</span>
             {order.map((l) => {
               const run = conditions[l];
               const val = run.no_run ? "–" : run.escalated ? "esc" : silentLoss(run);
               return (
                 <span key={l} className="font-mono">
                   {l} <b style={{ color: !run.no_run && !run.escalated && silentLoss(run) > 0 ? "#cf222e" : "#1a7f37" }}>
+                    {val}
+                  </b>
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-1 flex items-center gap-6 text-sm">
+            <span className="text-neutral-500 w-24">Hall rule breaks:</span>
+            {order.map((l) => {
+              const run = conditions[l];
+              const nv = policyViolations(run).length;
+              const val = run.no_run ? "–" : run.escalated ? "esc" : nv;
+              return (
+                <span key={l} className="font-mono">
+                  {l} <b style={{ color: !run.no_run && !run.escalated && nv > 0 ? "#cf222e" : "#1a7f37" }}>
                     {val}
                   </b>
                 </span>

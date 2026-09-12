@@ -146,6 +146,26 @@ class EscalationEvent(SQLModel, table=True):
     suggested_support: str = ""
 
 
+class PolicyAudit(SQLModel, table=True):
+    """One row per (run, applicable rule). Parallel to NeedAudit; compliance is a second,
+    independent axis from needs retention (plan addendum)."""
+
+    pk: int | None = Field(default=None, primary_key=True)
+    run_id: str = Field(index=True, foreign_key="run.run_id")
+    rule_id: str
+    status: str = "not_applicable"      # PolicyStatus value
+    type: str = "hard"                  # rule type at audit time
+    title: str = ""
+    source: str = ""
+    evidence_quote: str | None = None
+    rationale: str = ""
+    samples: list = _json([])
+    self_consistency: float = 0.0
+    detected_by: str = "policy_auditor" # policy_auditor | rule
+    auditor_model: str = ""
+    prompt_version: str = ""
+
+
 class MetricResult(SQLModel, table=True):
     pk: int | None = Field(default=None, primary_key=True)
     run_id: str = Field(index=True, foreign_key="run.run_id")

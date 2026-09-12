@@ -6,6 +6,7 @@ import {
 import { NeedLedger } from "@/components/NeedLedger";
 import { Stated, Inferred, StatusPill } from "@/components/Registers";
 import { AgreementCard } from "@/components/AgreementCard";
+import { PolicyPanel } from "@/components/PolicyPanel";
 
 const CONDS = [
   { key: "A", label: "A · Generic" }, { key: "B", label: "B · Context" },
@@ -168,6 +169,7 @@ export default function Workbench() {
                   ))}
                 </div>
               )}
+              <PolicyPanel run={run} />
               <div className="rounded-md border border-[#e5e2d8] bg-white p-2.5 text-[12px]">
                 <b>Escalation:</b> {run.escalated ? run.escalation?.category : "none"}
                 {run.culture_diff_rate != null && (
@@ -190,6 +192,7 @@ function label(ev: any): string {
   if (ev.kind === "llm_call") return `· ${ev.step}`;
   if (ev.kind === "audit") return `  audit[${ev.phase}] ${ev.need_id} → ${ev.status}`;
   if (ev.kind === "assumptions") return `  ⚠ ${ev.count} assumption(s) via ${ev.detected_by}`;
+  if (ev.kind === "policy") return `  ⚖ hall rule violation: ${(ev.violations||[]).join(", ")}`;
   if (ev.kind === "escalation") return `  ⛔ escalation: ${ev.category}`;
   if (ev.kind === "done") return `done (${ev.status})`;
   return ev.kind;

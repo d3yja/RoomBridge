@@ -84,6 +84,29 @@ def _is_droppable(n: dict) -> bool:
     return (not boundary) and (imp is not None and imp <= 2)
 
 
+_COMPLY_MAP = [
+    (re.compile(r"\bcook\w*|stove|hot ?plate|rice cooker|induction", re.I),
+     "use the shared pantry / common kitchen for cooking rather than the room "
+     "(hall rule: no cooking in rooms/suites)"),
+    (re.compile(r"\bsmok\w*|cigarette|vap\w*|alcohol|beer|wine", re.I),
+     "keep smoking and alcohol out of the room, in line with hall rules"),
+    (re.compile(r"overnight|stay\w* over|partner stays?|opposite[- ]sex", re.I),
+     "keep visitors within hall Privacy Hours (no opposite-sex visitors 00:00-07:00)"),
+]
+
+
+def _rules_present(blob: str) -> bool:
+    return ("hall rule" in blob.lower()) or ("HR_" in blob)
+
+
+def _comply(text: str) -> tuple[str, bool]:
+    """If the text would break a hard rule, return a compliant reframing; else unchanged."""
+    for pat, replacement in _COMPLY_MAP:
+        if pat.search(text):
+            return replacement, True
+    return text, False
+
+
 class MockProvider:
     name = "mock"
 
@@ -164,8 +187,16 @@ class MockProvider:
                     continue  # low-salience preference -> silently dropped
                 if re.search(r"context|may relate|explanatory|consideration", line, re.I):
                     continue  # advisory context is explanation, never an agreement term
+                if re.search(r"^\[?(hard|guideline)\]|hall rules the agreement|"
+                             r"no remaining on the hall|hmt handbook", line, re.I):
+                    continue  # appended hall-rules block is policy, not an agreement term
                 if loud.search(line):
-                    terms.append({"text": f"The roommates agree: {line}", "addresses_need_ids": []})
+                    if _rules_present(blob):
+                        fixed, changed = _comply(line)
+                        text = f"The roommates agree to {fixed}" if changed else f"The roommates agree: {line}"
+                    else:
+                        text = f"The roommates agree: {line}"  # baseline A: echoes as-is, may break a rule
+                    terms.append({"text": text, "addresses_need_ids": []})
             if not terms:
                 terms = [{"text": "The roommates agree to be considerate of each other's schedules.",
                           "addresses_need_ids": []}]
@@ -189,6 +220,13 @@ class MockProvider:
                         cval = cval_txt
                         break
                 summary = n.get("normalized") or n.get("verbatim")
+                need_text = f"{n.get('verbatim','')} {summary}"
+                if _rules_present(blob):
+                    fixed, changed = _comply(need_text)
+                    if changed:
+                        terms.append({"text": f"To meet {n['need_id']}, {fixed}.",
+                                      "addresses_need_ids": [n["need_id"]]})
+                        continue
                 terms.append({
                     "text": f"The agreement provides for: {summary}{cval if isinstance(cval,str) else ''}.",
                     "addresses_need_ids": [n["need_id"]],
@@ -227,6 +265,28 @@ class MockProvider:
             "evidence_quote": quote,
             "rationale": f"Keyword overlap {best_overlap} between need and agreement text.",
         })
+
+    def _step_check_policy(self, blob, messages):
+        # Return a status per rule found in the prompt. Blatant hard-rule violations are
+        # caught by the deterministic layer in pipeline.policy regardless of what we say,
+        # so here we mark a rule "compliant" when its area is touched, else "not_applicable".
+        agreement = self._agreement_text(blob)
+        rule_ids = []
+        for block in _find_blocks(blob):
+            items = block if isinstance(block, list) else [block]
+            for it in items:
+                if isinstance(it, dict) and "rule_id" in it and "title" in it:
+                    rule_ids.append(it)
+        akw = _keywords(agreement)
+        out = []
+        for r in rule_ids:
+            rkw = _keywords(f"{r.get('title','')} {r.get('rule_text','')}")
+            applicable = len(akw & rkw) >= 1
+            out.append({"rule_id": r["rule_id"],
+                        "status": "compliant" if applicable else "not_applicable",
+                        "evidence_quote": None,
+                        "rationale": "mock: area addressed" if applicable else "mock: not touched"})
+        return json.dumps(out)
 
     def _step_check_assumptions(self, blob, messages):
         return json.dumps([])  # deterministic-rule layer handles the blatant cases
